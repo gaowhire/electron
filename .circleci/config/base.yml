@@ -41,9 +41,9 @@ executors:
     parameters:
       size:
         description: "Docker executor size"
-        default: 2xlarge+
+        default: 2xlarge
         type: enum
-        enum: ["medium", "xlarge", "2xlarge+"]
+        enum: ["medium", "xlarge", "2xlarge"]
     docker:
       - image: ghcr.io/electron/build:e6bebd08a51a0d78ec23e5b3fd7e7c0846412328
     resource_class: << parameters.size >>
@@ -1731,7 +1731,9 @@ jobs:
           use-out-cache: false
 
   linux-x64-testing-asan:
-    executor: linux-docker
+    executor:
+      name: linux-docker
+      size: 2xlarge
     environment:
       <<: *env-global
       <<: *env-testing-build
@@ -1747,7 +1749,9 @@ jobs:
           build-nonproprietary-ffmpeg: false
 
   linux-x64-testing-no-run-as-node:
-    executor: linux-docker
+    executor:
+      name: linux-docker
+      size: xlarge
     environment:
       <<: *env-linux-2xlarge
       <<: *env-testing-build
@@ -1768,19 +1772,6 @@ jobs:
       <<: *env-linux-medium
       <<: *env-testing-build
     <<: *steps-electron-gn-check
-
-  linux-x64-release:
-    executor: linux-docker
-    environment:
-      <<: *env-linux-2xlarge-release
-      <<: *env-release-build
-      <<: *env-send-slack-notifications
-      <<: *env-ninja-status
-      GCLIENT_EXTRA_ARGS: '--custom-var=checkout_arm=True --custom-var=checkout_arm64=True'
-    steps:
-      - electron-build:
-          persist: true
-          checkout: true
 
   linux-x64-publish:
     executor: linux-docker
@@ -1803,7 +1794,9 @@ jobs:
 
 
   linux-arm-testing:
-    executor: linux-docker
+    executor:
+      name: linux-docker
+      size: xlarge
     environment:
       <<: *env-global
       <<: *env-arm
@@ -1817,20 +1810,6 @@ jobs:
           persist: true
           checkout: true
           use-out-cache: false
-
-  linux-arm-release:
-    executor: linux-docker
-    environment:
-      <<: *env-linux-2xlarge-release
-      <<: *env-arm
-      <<: *env-release-build
-      <<: *env-send-slack-notifications
-      <<: *env-ninja-status
-      GCLIENT_EXTRA_ARGS: '--custom-var=checkout_arm=True --custom-var=checkout_arm64=True'
-    steps:
-      - electron-build:
-          persist: false
-          checkout: true
 
   linux-arm-publish:
     executor: linux-docker
@@ -1855,7 +1834,9 @@ jobs:
                 checkout: true
 
   linux-arm64-testing:
-    executor: linux-docker
+    executor:
+      name: linux-docker
+      size: xlarge
     environment:
       <<: *env-global
       <<: *env-arm64
@@ -1879,20 +1860,6 @@ jobs:
       <<: *env-arm64
       <<: *env-testing-build
     <<: *steps-electron-gn-check
-
-  linux-arm64-release:
-    executor: linux-docker
-    environment:
-      <<: *env-linux-2xlarge-release
-      <<: *env-arm64
-      <<: *env-release-build
-      <<: *env-send-slack-notifications
-      <<: *env-ninja-status
-      GCLIENT_EXTRA_ARGS: '--custom-var=checkout_arm=True --custom-var=checkout_arm64=True'
-    steps:
-      - electron-build:
-          persist: false
-          checkout: true
 
   linux-arm64-publish:
     executor: linux-docker
@@ -2170,16 +2137,6 @@ jobs:
       <<: *env-headless-testing
       <<: *env-stack-dumping
     <<: *steps-test-node
-
-  linux-x64-release-tests:
-    executor:
-      name: linux-docker
-      size: medium
-    environment:
-      <<: *env-linux-medium
-      <<: *env-headless-testing
-      <<: *env-send-slack-notifications
-    <<: *steps-tests
 
   linux-x64-verify-ffmpeg:
     executor:
